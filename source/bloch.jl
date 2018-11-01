@@ -1,16 +1,16 @@
 # Copyright (c) 2016, QuTech, TU Delft, written by W. Hekman and S. Wehner
 # All rights reserved.
-# 
+#
 # Redistribution and use in source and binary forms, with or without modification, are permitted provided that the following conditions are met:
-# 
+#
 # 1. Redistributions of source code must retain the above copyright notice, this list of conditions and the following disclaimer.
-# 
+#
 # 2. Redistributions in binary form must reproduce the above copyright notice, this list of conditions and the following disclaimer in the documentation and/or other materials provided with the distribution.
-# 
+#
 # 3. Neither the name of the copyright holder nor the names of its contributors may be used to endorse or promote products derived from this software without specific prior written permission.
-# 
+#
 # THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
-# 
+#
 
 #############################################
 # INFO:                                                                          #
@@ -20,7 +20,7 @@
 #############################################
 # Summary:
 #               Allows you to make Bloch sphere pictures
-#               in an object-oriented fashion. 
+#               in an object-oriented fashion.
 #               Basically, user creates an instance of type Bloch
 #               add elements to be plotted with add_vector(), etc.
 #               render the picture with render() function.
@@ -32,9 +32,9 @@
 
 # Our element type: elements to plot on the Bloch sphere:
 # Points, vectors, lines etc.
-type Element
+mutable struct Element
     coord::Vector
-    kind::AbstractString 
+    kind::AbstractString
     label::AbstractString
     linestyle::AbstractString
     markerSize::Number
@@ -42,10 +42,10 @@ end
 
 # BLOCH Sphere type:
 # a collection of information
-# which can be used to render 
+# which can be used to render
 # a Bloch Sphere picture
 # using the render() function.
-type Bloch
+mutable struct Bloch
     sphere_color::Vector{Float64}
     mesh_color::Vector{Float64}
     axis_color::Vector{Float64}
@@ -72,37 +72,37 @@ Bloch() = Bloch([0.5,0.1,0.1,0.02],
 #############
 
 # method to add element to Bloch Sphere
-function add_element(b::Bloch, 
+function add_element(b::Bloch,
                                         coord::Vector;
-                                        kind = "vector"::ASCIIString, 
-                                        label =""::AbstractString, 
-                                        linestyle = "-"::ASCIIString,
+                                        kind = "vector"::String, 
+                                        label =""::AbstractString,
+                                        linestyle = "-"::String,
                                         markerSize = 20::Int)
 
     #linestyles = ['_', '-', '--', ':']
-    
+
     if length(coord) == 2 # assume degree coords θ,ϕ
         xyz = [
                 sind(coord[1])*cosd(coord[2]),
                 sind(coord[1])*sind(coord[2]),
                 cosd(coord[1])
-                ]  
+                ]
     elseif length(coord) == 3 # assume cartesian
         xyz = coord
     else
-        error("Points = [θ,ϕ] (degrees) or [x,y,z] (float)")        
+        error("Points = [θ,ϕ] (degrees) or [x,y,z] (float)")
     end
 
     push!(b.elements, Element(xyz,kind,label,linestyle,markerSize))
-end    
+end
 
 # ALIAS: different, specialized names for add_element
-add_vector(b::Bloch, coord::Vector) = add_element(b, coord) 
-add_vector(b::Bloch, coord::Vector, x::AbstractString) = add_element(b, coord, label = x) 
+add_vector(b::Bloch, coord::Vector) = add_element(b, coord)
+add_vector(b::Bloch, coord::Vector, x::AbstractString) = add_element(b, coord, label = x)
 
-add_point(b::Bloch, coord::Vector) = add_element(b, coord, kind = "point") 
-add_point(b::Bloch, coord::Vector, x::AbstractString) = add_element(b, coord, kind = "point", label = x) 
-add_point(b::Bloch, coord::Vector, x::AbstractString, y::Int) = add_element(b, coord, kind = "point", label = x, markerSize = y) 
+add_point(b::Bloch, coord::Vector) = add_element(b, coord, kind = "point")
+add_point(b::Bloch, coord::Vector, x::AbstractString) = add_element(b, coord, kind = "point", label = x)
+add_point(b::Bloch, coord::Vector, x::AbstractString, y::Int) = add_element(b, coord, kind = "point", label = x, markerSize = y)
 
 
 # CLEAR the element list.
@@ -130,8 +130,8 @@ function render(b::Bloch,rotate_z = 0)
     mesh(x,y,z, rstride=10, cstride=6, color=b.mesh_color)
 
     # plot equator
-    plot( cos(u), sin(u), zs=0, color=b.equator_color, linewidth= 1 ) 
-    plot( cos(u), sin(u), zs=0, zdir="x", color=b.equator_color, linewidth= 1 ) 
+    plot( cos(u), sin(u), zs=0, color=b.equator_color, linewidth= 1 )
+    plot( cos(u), sin(u), zs=0, zdir="x", color=b.equator_color, linewidth= 1 )
 
     # plot xyz bloch sphere axis
     span = linspace(-1,1,2)
@@ -176,7 +176,7 @@ function render(b::Bloch,rotate_z = 0)
             end
         end
     end
-        
+
     ###########
     # Styling     #
     ###########
@@ -214,7 +214,7 @@ function render(b::Bloch,rotate_z = 0)
 
     # add legend
     ax[:legend](fontsize = "medium")
-    
+
     # view angle
     ax[:view_init](b.view_elevation,b.view_azimuth+rotate_z)
 end
